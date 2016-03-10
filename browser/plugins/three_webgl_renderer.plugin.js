@@ -100,7 +100,7 @@
 
 		if (E2.app.worldEditor.isActive()) {
 			E2.app.worldEditor.preRenderUpdate()
-			
+
 			// Render the scene through the world editor camera
 			this.manager.render(this.scene, E2.app.worldEditor.getCamera())
 		}
@@ -121,8 +121,28 @@
 		this.resize()
 	}
 
+	ThreeWebGLRendererPlugin.prototype.onVRPresentChange = function() {
+		// change canvas size
+		this.resize()
+	}
+
 	ThreeWebGLRendererPlugin.prototype.resize = function() {
 		console.log('ThreeWebGLRendererPlugin.resize')
+
+		var hmd = this.manager.hmd
+		var isPresenting = hmd && hmd.isPresenting
+
+		if (isPresenting) {
+			var leftEye = hmd.getEyeParameters("left")
+			var rightEye = hmd.getEyeParameters("right")
+
+			this.domElement.width = Math.max(leftEye.renderWidth, rightEye.renderWidth) * 2
+			this.domElement.height = Math.max(leftEye.renderHeight, rightEye.renderHeight)
+		}
+		else {
+			this.domElement.width = this.domElement.offsetWidth * window.devicePixelRatio
+			this.domElement.height = this.domElement.offsetHeight * window.devicePixelRatio
+		}
 
 		var isFullscreen = !!(document.mozFullScreenElement || document.webkitFullscreenElement);
 		var wh = { width: window.innerWidth, height: window.innerHeight }
@@ -138,20 +158,37 @@
 		this.effect.setSize(wh.width, wh.height)
 	}
 
-	ThreeWebGLRendererPlugin.prototype.onFullScreenChanged = function() {
-		var isFullscreen = !!(document.mozFullScreenElement || document.webkitFullscreenElement)
-		console.log('ThreeWebGLRendererPlugin.onFullScreenChanged', isFullscreen)
-
-		if (!isFullscreen)
-			this.manager.enterVR()
-		else
-			this.manager.exitVR()
-	}
-
+	/*
+	application calls this when we intend to get to fullscreen
+	*/
 	ThreeWebGLRendererPlugin.prototype.toggleFullScreen = function() {
-		var isFullscreen = E2.util.isFullscreen()
-		console.log('ThreeWebGLRendererPlugin.toggleFullScreen', !isFullscreen)
-		this.manager.toggleFullScreen()
+		var goingToFullscreen = this.manager.mode === 1
+		console.log('ThreeWebGLRendererPlugin.toggleFullScreen', goingToFullscreen)
+
+		var that = this
+
+		if (goingToFullscreen) {
+			// normal to VR or full screen
+			//this.manager.toggleFullScreen()
+			this.effect.requestPresent()
+			.catch(function(e) {
+				// cannot present in VR, try
+				that.manager.toggleFullScreen()
+			})
+		}
+		else {
+			// toggleFullScreen doesn't get back from VR mode so we have to
+			// do it ourselves
+
+			// equivalent to WebVRManager.prototype.onBackClick_()
+			//this.manager.onBackClick_()
+
+			this.effect.exitPresent()
+			.catch(function (e) {
+				that.manager.setMode_(1);
+				that.manager.exitFullscreen_();
+			})
+		}
 	}
 
 	ThreeWebGLRendererPlugin.prototype.state_changed = function(ui) {
@@ -164,12 +201,12 @@
 
 			// for now (three.js r74) VREffect is not compatible with webvr-boilerplate
 			// nor three.js so we use THREE.CardboardEffect instead
-			if (!window.vizorNativeWebVRAvailable) {
-				this.effect = new THREE.CardboardEffect(this.renderer)
-			}
-			else {
+			//if (!window.vizorNativeWebVRAvailable) {
+			//	this.effect = new THREE.CardboardEffect(this.renderer)
+			//}
+			//else {
 				this.effect = new THREE.VREffect(this.renderer)
-			}
+			//}
 
 			this.manager = new WebVRManager(this.renderer, this.effect, { hideButton: true })
 
@@ -178,6 +215,7 @@
 			E2.core.on('resize', this.resize.bind(this))
 			// E2.core.on('fullScreenChanged', this.onFullScreenChanged.bind(this))
 			E2.core.on('fullScreenChangeRequested', this.toggleFullScreen.bind(this))
+			window.addEventListener('vrdisplaypresentchange', this.onVRPresentChange.bind(this), false)
 
 			// resize to initial size
 			this.resize()
