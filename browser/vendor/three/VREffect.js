@@ -86,11 +86,13 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	var canvas = renderer.domElement;
 	var fullscreenchange = canvas.mozRequestFullScreen ? 'mozfullscreenchange' : 'webkitfullscreenchange';
-	
+
 	document.addEventListener( fullscreenchange, updatePresentingFlag, false );
 
 	window.addEventListener( 'vrdisplaypresentchange',  updatePresentingFlag, false );
 
+	// we shouldn't need this, but android chromium dev (29 Feb)
+	// doesn't seem to fire vrdisplaypresentchange events, so we do it here instead
 	window.addEventListener( 'resize', updatePresentingFlag, false )
 
 	this.setFullScreen = function ( boolean ) {
