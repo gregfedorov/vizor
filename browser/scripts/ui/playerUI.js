@@ -437,7 +437,7 @@ VizorPlayerUI.prototype.play = function() {
 }
 
 VizorPlayerUI.prototype.amendVRManagerInstructions = function() {
-	var r = E2.core.webVRManager.rotateInstructions || E2.core.webVRManager.hmd.rotateInstructions_
+	var r = E2.core.webVRManager.hmd.rotateInstructions_
 
 	if(!r) {
 		console.log('no rotate instructions found')
@@ -468,7 +468,7 @@ VizorPlayerUI.prototype.amendVRManagerInstructions = function() {
 		.prepend(svg)
 	r.text.innerHTML = r.text.innerHTML.replace("Cardboard viewer", "VR viewer")
 	// if not bound directly, it sometimes stops working when reloading player files
-	var onclick = "E2.core.webVRManager.onBackClick_();siteUI.tagBodyClass();return false;"
+	var onclick = "E2.core.webVRManager.hmd.rotateInstructions_.hide();E2.core.webVRManager.onBackClick_();siteUI.tagBodyClass();return false;"
 	r.text.innerHTML += "<br /><br /><button style='color:white' onclick='"+onclick+"' id='backfromvr'>Exit VR view</button>"
 
 	$(r.text).css({
