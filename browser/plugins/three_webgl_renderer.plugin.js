@@ -170,11 +170,14 @@
 		if (goingToFullscreen) {
 			// normal to VR or full screen
 			//this.manager.toggleFullScreen()
-			this.effect.requestPresent()
+
+			that.manager.toggleFullScreen()
+
+			/*this.effect.requestPresent()
 			.catch(function(e) {
 				// cannot present in VR, try
 				that.manager.toggleFullScreen()
-			})
+			})*/
 		}
 		else {
 			// toggleFullScreen doesn't get back from VR mode so we have to
@@ -183,11 +186,17 @@
 			// equivalent to WebVRManager.prototype.onBackClick_()
 			//this.manager.onBackClick_()
 
-			this.effect.exitPresent()
-			.catch(function (e) {
+			if (this.manager.hmd && this.manager.hmd.isPresenting) {
+				this.manager.hmd.exitPresent()
+				.then(function() {
+					that.manager.setMode_(1)
+					that.manager.exitFullscreen_()
+				})
+			}
+			else {
 				that.manager.setMode_(1);
 				that.manager.exitFullscreen_();
-			})
+			}
 		}
 	}
 

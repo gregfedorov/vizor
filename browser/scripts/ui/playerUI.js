@@ -293,7 +293,7 @@ var VizorPlayerUI = function() {
 
 		var onVRModeChanged = function(e) {
 			var mode = e.detail.mode, oldMode = e.detail.oldMode
-			if (mode !== 3) {
+			if (mode === 1) {
 				$body.removeClass('inVR')
 				that.headerIsVisible = false
 				that.overHeader = false

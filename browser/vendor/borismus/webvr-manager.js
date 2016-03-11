@@ -498,6 +498,8 @@ WebVRManager.prototype.setMode_ = function(mode) {
   this.mode = mode;
   this.button.setMode(mode, this.isVRCompatible);
 
+  document.body.dispatchEvent(new CustomEvent('vrManagerModeChanged', {detail: {mode: mode, oldMode: oldMode, vrCompatible: this.isVRCompatible}}))      // gm
+
   // Emit an event indicating the mode changed.
   this.emit('modechange', mode, oldMode);
 };
