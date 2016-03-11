@@ -160,6 +160,7 @@
 
 	/*
 	application calls this when we intend to get to fullscreen
+	or come back from it to normal mode
 	*/
 	ThreeWebGLRendererPlugin.prototype.toggleFullScreen = function() {
 		var goingToFullscreen = this.manager.mode === 1
@@ -169,23 +170,15 @@
 
 		if (goingToFullscreen) {
 			// normal to VR or full screen
-			//this.manager.toggleFullScreen()
-
 			that.manager.toggleFullScreen()
-
-			/*this.effect.requestPresent()
-			.catch(function(e) {
-				// cannot present in VR, try
-				that.manager.toggleFullScreen()
-			})*/
 		}
 		else {
 			// toggleFullScreen doesn't get back from VR mode so we have to
 			// do it ourselves
 
-			// equivalent to WebVRManager.prototype.onBackClick_()
-			//this.manager.onBackClick_()
-
+			// to get back to normal mode, we have to:
+			// 1) exit presentation mode
+			// 2) do an equivalent to WebVRManager.prototype.onBackClick_()
 			if (this.manager.hmd && this.manager.hmd.isPresenting) {
 				this.manager.hmd.exitPresent()
 				.then(function() {
@@ -194,6 +187,7 @@
 				})
 			}
 			else {
+				// no hmd, we still want to go to normal mode
 				that.manager.setMode_(1);
 				that.manager.exitFullscreen_();
 			}

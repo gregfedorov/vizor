@@ -413,7 +413,8 @@ function WebVRManager(renderer, effect, params) {
   // Check if the browser is compatible with WebVR.
   this.getDeviceByType_(VRDisplay).then(function(hmd) {
     // Only enable VR mode if we're on a mobile device.
-    this.isVRCompatible = Util.isMobile();
+    // No - always, because we also want to do VR on the Vive! - Vizor
+    this.isVRCompatible = true;//Util.isMobile();
     this.hmd = hmd;
 
     this.emit('initialized');
