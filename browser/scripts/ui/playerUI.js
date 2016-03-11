@@ -293,7 +293,7 @@ var VizorPlayerUI = function() {
 
 		var onVRModeChanged = function(e) {
 			var mode = e.detail.mode, oldMode = e.detail.oldMode
-			if (mode === 1) {
+			if (mode !== 3) {
 				$body.removeClass('inVR')
 				that.headerIsVisible = false
 				that.overHeader = false
@@ -437,7 +437,13 @@ VizorPlayerUI.prototype.play = function() {
 }
 
 VizorPlayerUI.prototype.amendVRManagerInstructions = function() {
-	var r = E2.core.webVRManager.rotateInstructions
+	var r = E2.core.webVRManager.rotateInstructions || E2.core.webVRManager.hmd.rotateInstructions_
+
+	if(!r) {
+		console.log('no rotate instructions found')
+		return
+	}
+
 	var o = r.overlay
 	o.className = 'VRInstructions'
 
