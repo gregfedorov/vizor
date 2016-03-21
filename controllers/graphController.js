@@ -104,7 +104,6 @@ GraphController.prototype.publicRankedIndex = function(req, res, next) {
 	this._service.publicRankedList()
 	.then(function(list) {
 		list.map(function(graph) {
-			console.log('graph', graph)
 			graph = prettyPrintGraphInfo(graph)
 			graph.prettyName = makeCardName(graph.prettyName)
 		})
