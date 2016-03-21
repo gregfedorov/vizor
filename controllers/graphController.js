@@ -98,10 +98,34 @@ function GraphController(s, gfs, mongoConnection) {
 	this.previewImageProcessor = new PreviewImageProcessor()
 }
 
-GraphController.prototype = Object.create(AssetController.prototype);
+GraphController.prototype = Object.create(AssetController.prototype)
+
+GraphController.prototype.publicRankedIndex = function(req, res, next) {
+	this._service.publicRankedList()
+	.then(function(list) {
+		list.map(function(graph) {
+			console.log('graph', graph)
+			graph = prettyPrintGraphInfo(graph)
+			graph.prettyName = makeCardName(graph.prettyName)
+		})
+
+		if (req.xhr) {
+			return res.json(helper.responseStatusSuccess('OK', list))
+		}
+
+		res.render('server/pages/browse', {
+			meta : {
+				title: 'Vizor - Browse',
+				bodyclass: 'bBrowse',
+				scripts : ['site/userpages.js']
+			},
+			graphs: list
+		})
+	})
+	.catch(next)
+}
 
 GraphController.prototype.userIndex = function(req, res, next) {
-	var wantJson = req.xhr;
 	var username = req.params.model
 
 	var that = this
@@ -130,7 +154,7 @@ GraphController.prototype.userIndex = function(req, res, next) {
 				graphs: list || []
 			}
 
-			if (wantJson) {
+			if (req.xhr) {
 				return res.status(200).json(
 					helper.responseStatusSuccess("OK", data))
 			}
@@ -466,6 +490,7 @@ GraphController.prototype.save = function(req, res, next) {
 				path: path,
 				tags: tags,
 				url: url,
+				private: !!req.body.private,
 				hasAudio: !!analysis.hasAudio,
 				stat: {
 					size: analysis.size,

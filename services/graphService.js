@@ -36,6 +36,23 @@ GraphService.prototype.minimalList = function() {
 	return dfd.promise;
 };
 
+GraphService.prototype.publicRankedList = function() {
+	var dfd = when.defer()
+
+	this._model
+		.find({ private: false })
+		.sort('-rank')
+		.exec(function(err, list)
+	{
+		if (err)
+			return dfd.reject(err)
+		
+		dfd.resolve(list)
+	})
+
+	return dfd.promise
+}
+
 GraphService.prototype.userGraphs = function(username) {
 	var dfd = when.defer();
 	this._model
@@ -79,7 +96,8 @@ GraphService.prototype._save = function(data, user) {
 		if (data.hasAudio)
 			asset.hasAudio = data.hasAudio
 
-		data.version = currentPlayerVersion
+		asset.private = data.private || false
+		asset.version = currentPlayerVersion
 
 		var dfd = when.defer();
 
